@@ -1,0 +1,58 @@
+create database mydatabase
+create schema gme
+
+create table gme.usertbl(
+userid Int primary key,
+name varchar(30),
+address varchar(30),
+phno varchar(10)
+)
+drop table gme.usertbl
+insert into gme.usertbl values(1,'ravi','pushpabar','8008020838')
+
+insert into person.PhoneNumberType (Name,ModifiedDate) values ('hay',GETDATE())
+
+select *from gme.usertbl
+
+alter table gme.usertbl 
+add constraint cc_id
+check (userid <5 )
+
+alter table gme.usertbl
+drop constraint cc_id
+
+
+create view firstview as select userid,name,address,phno from gme.usertbl
+
+select *from firstview
+
+
+select *from person.PhoneNumberType
+
+
+select *from person.person
+select *from person.EmailAddress
+
+select *from person.CountryRegion
+
+select p.firstname,e.emailaddress from person.person p inner join person.EmailAddress e on p.BusinessEntityID=e.BusinessEntityID where p.BusinessEntityID=4
+
+select p.firstname,pb.addressline1 from person.person p inner join person.BusinessEntityAddress pe on p.BusinessEntityID=pe.BusinessEntityID inner join person.Address pb on pe.AddressID=pb.AddressID
+
+select p3.addressline1,p3.addressline2 from person.CountryRegion p1 inner join person.StateProvince p2 on p1.CountryRegionCode=p2.CountryRegionCode inner join person.Address p3 on 
+p2.StateProvinceID=p3.StateProvinceID where p1.Name='afghanisthan'
+
+create table #temp
+(userid Int primary key,
+name varchar(30),
+address varchar(30),
+phno varchar(10))
+
+insert into #temp select *from gme.usertbl
+select *from #temp
+
+with gme_cte as(
+select *from #temp)
+select *from gme_cte
+
+

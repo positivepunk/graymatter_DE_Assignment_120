@@ -1,0 +1,187 @@
+create table gme.insertlog(loginId int identity(1,1) primary key,
+insertedDate datetime,
+updateDate datetime,
+deletedate datetime,
+insertedBy nvarchar(100),
+updatedBy nvarchar(100),
+deletedBy nvarchar(100)
+);
+
+drop table gme.insertlog
+
+create trigger trg_afterInsertr
+on Sales.customer
+AFTER INSERT
+AS
+BEGIN
+	INSERT INTO gme.insertlog(insertedDate,insertedBy)
+	VALUES (GETDATE(),SUSER_SNAME());
+END;
+
+create trigger trg_afterUpdater
+on Sales.customer
+AFTER UPDATE
+AS
+BEGIN
+	INSERT INTO gme.insertlog(updateDate,updatedBy)
+	VALUES (GETDATE(),SUSER_SNAME());
+END;
+
+create trigger trg_afterInsertrud
+on Sales.customer
+AFTER DELETE
+AS
+BEGIN
+	INSERT INTO gme.insertlog(deleteDate,deletedBy)
+	VALUES (GETDATE(),SUSER_SNAME());
+END;
+
+INSERT INTO Sales.Customer (PersonID) VALUES (1)
+
+delete from Sales.Customer where customerID=1
+
+update Sales.Customer set personid=8960 where storeID=934
+go
+
+delete
+
+select *from gme.insertlog
+
+create TRIGGER trg_InsteadOfInsertr
+ON Sales.Customer
+INSTEAD OF INSERT
+AS 
+BEGIN
+	INSERT INTO gme.insertlog(insertedDate,insertedBy)
+	VALUES (GETDATE(),SUSER_SNAME());
+END;
+
+create TRIGGER trg_InsteadOfInsertru
+ON Sales.Customer
+INSTEAD OF UPDATE
+AS 
+BEGIN
+	INSERT INTO gme.insertlog(updateDate,updatedBy)
+	VALUES (GETDATE(),SUSER_SNAME());
+END;
+
+
+create TRIGGER trg_InsteadOfInsertrud
+ON Sales.Customer
+INSTEAD OF DELETE
+AS 
+BEGIN
+	INSERT INTO gme.insertlog(deleteDate,deletedBy)
+	VALUES (GETDATE(),SUSER_SNAME());
+END;
+
+
+select *from production.product
+
+CREATE function calculateTotalHours(@vacationhours DECIMAL(10,2),@sickleavehours DECIMAL(10,2))
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+	DECLARE @TotalDays DECIMAL(10,2);
+	SET @TotalDays=(@vacationhours+@sickleavehours)/24;
+	RETURN @TotalDays;
+END;
+
+select loginID,JobTitle,VacationHours,SickLeaveHours,dbo.calculateTotalHours(VacationHours,SickLeaveHours) AS TotalDays from HumanResources.Employee
+
+CREATE function getcustinfo(@city NVARCHAR(100))
+RETURNS TABLE
+AS
+RETURN(
+	select CustomerID,CustomerName,city where city=@city);
+END;
+
+select *from dbo.getcustinfo('newyork');
+
+--start a transaction
+BEGIN TRANSACTION;
+--variables for warehouse IDs and Quantity to transfer
+DECLARE @FromWarehouseID INT=1;
+Declare @ToWarehouseID INT=2;
+Declare @ProductID INT =5;
+Declare @QuantityToTransfer INT=10;
+
+--person the inventory tranfer
+UPDATE Production.ProductInventory
+SET Quantity =Quantity - @QuantityToTransfer
+WHERE ProductID=@ProductID AND LocationID=@FromwarehouseID;
+
+INSERT INTO Production.ProductInventory (ProductID,LocationID,Shelf,Bin,Quantity)
+VALUES (@ProductID,@ToWarehouseID,'A','1',@QuantityToTransfer);
+
+--commit the transaction if everything is successful
+COMMIT TRANSACTION;
+PRINT 'Inventory tranfer completed successfully';
+
+
+
+
+create table #temp(
+SalesOrderID INT,
+OrderDate DATETIME,
+TotalDue DECIMAL(10,2))
+
+create table dbo.SalesOrderChangeLog(
+ChangeID INT IDENTITY(1,1) PRIMARY KEY,
+SalesOrderID INT,
+OldTaxamt MONEY,
+NewTaxamt MONEY,
+ChangeDate DATETIME
+);
+
+create PROCEDURE final @CustomerID INT,@SalesOrderID INT,@Newtax MONEY
+AS
+BEGIN
+	BEGIN TRANSACTION;
+	
+	DECLARE @Total_Sales DECIMAL(10,2) ;
+
+with gme_cte as(
+select t1.CustomerID,sum(t2.SubTotal) as total from Sales.Customer t1 INNER JOIN Sales.SalesOrderHeader t2 on t1.CUSTOMERID=t2.CUSTOMERID  where t1.CustomerID=@CustomerID group by t1.CustomerID
+)
+select @Total_Sales= total from gme_cte
+Print  @Total_Sales
+
+INSERT INTO #temp
+SELECT
+	SalesOrderID,
+	OrderDate,
+	TOtalDue
+From
+	Sales.SalesOrderHeader
+WHERE
+	SalesOrderID=@SalesOrderID;
+
+	UPDATE Sales.SalesOrderHeader set TaxAmt=@NewTax WHERE SalesOrderID=@SalesOrderID
+COMMIT TRANSACTION
+END
+GO
+
+exec final @CustomerID=29825,@SalesOrderID=43659,@Newtax=768
+
+
+	create trigger trg_afterInsertt on  Sales.SalesOrderHeader
+	AFTER UPDATE
+		AS
+		BEGIN
+		INSERT INTO dbo.SalesOrderChangeLog(SalesOrderID,OldTaxamt,NewTaxamt,ChangeDate)
+		SELECT i.SalesOrderID,d.TaxAmt,i.TaxAmt,GETDATE() FROM inserted i INNER JOIN deleted d on i.SalesOrderID=d.SalesOrderID;
+	END;
+
+
+
+
+	select *from  dbo.SalesOrderChangeLog
+
+
+
+
+
+
+select *from #temp
+select *from gme_cte

@@ -1,0 +1,151 @@
+--scd's
+create table emp(
+Cid INT ,
+Address VARCHAR(100),
+NewDate DATETIME,
+OldDate DATETIME
+);
+
+DROP TABLE emp;
+
+INSERT INTO emp VALUES (1,'laggere',GETDATE(),NULL)
+INSERT INTO emp VALUES (2,'lahhere',GETDATE(),NULL)
+INSERT INTO emp VALUES (3,'lasere',GETDATE(),NULL)
+
+--scd1
+update emp set Address='baghira' where Cid=1
+
+--scd2
+INSERT INTO emp VALUES (1,'laggere',NULL,(select NewDate from emp where Cid=1))
+
+update emp set NewDate=GETDATE(),OldDate=NULL where Cid=1 AND OldDate IS NOT NULL;
+
+DELETE FROM emp WHERE Cid=1 AND Address='laggere'
+
+--scd3 
+Alter Table Emp Add PreviousAddress VARCHAR(100)
+UPDATE emp SET PreviousAddress=(select Address from emp where Cid=1 AND OldDate IS NULL) where Cid=1
+
+select *from emp
+
+EXEC sys.sp_cdc_enable_table
+	@source_schema = N'gme',
+	@source_name = N'usertbl',
+	@role_name = NULL;
+
+
+	select *from cdc.gme_usertbl_CT
+
+	insert into gme.usertbl Values(3,'rakeshadiga','nanu',8904020630)
+
+	delete from gme.usertbl where userid=1
+
+	select *from gme.usertbl
+	
+
+	select CAST(OrderDate AS DATE) as Date from Sales.SalesOrderHeader
+
+
+
+	CREATE FUNCTION dbo.GetLocalPartFromEmail
+(
+    @EmailAddress NVARCHAR(255)
+)
+RETURNS NVARCHAR(255)
+AS
+BEGIN
+    DECLARE @LocalPart NVARCHAR(255);
+    
+    -- Extract the local part (substring before '@')
+    SET @LocalPart = SUBSTRING(@EmailAddress, 1, CHARINDEX('.com', @EmailAddress) - 1);
+    
+    -- Return the local part
+    RETURN @LocalPart;
+END
+GO
+
+drop function 
+
+
+
+SELECT 
+    
+    dbo.GetLocalPartFromEmail(EmailAddress) AS LocalPart
+FROM 
+    Person.EmailAddress;
+
+SELECT 
+    
+    dbo.GetLocalPartFromEmail('hskfch@adventures.com') AS LocalPart
+
+
+
+	--merge
+
+	create schema sty
+-- Create dimCustomer table
+CREATE TABLE sty.dimCustomer (
+    CustomerID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Address VARCHAR(200)
+);
+
+-- Insert values into dimCustomer
+INSERT INTO sty.dimCustomer (CustomerID, Name, Address)
+VALUES
+    (1, 'John Doe', '123 Main St'),
+    (2, 'Jane Smith', '456 Elm St'),
+    (3, 'Michael Johnson', '789 Oak St');
+
+-- Create temporary table #tmpCustomer
+CREATE TABLE #tmpCustomer (
+    CustomerID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Address VARCHAR(200)
+);
+
+-- Insert rows into #tmpCustomer
+INSERT INTO #tmpCustomer (CustomerID, Name, Address)
+VALUES
+    (1, 'John Doe', '123 Main St'),   
+    (2, 'Jane Johnson', '456 Elm St'), 
+    (4, 'Anna Lee', '890 Pine St');   
+
+-- Perform MERGE statement to synchronize data between dimCustomer and #tmpCustomer
+MERGE INTO sty.dimCustomer AS target
+USING #tmpCustomer AS source
+ON target.CustomerID = source.CustomerID
+WHEN MATCHED THEN
+    UPDATE SET
+        target.Name = source.Name,
+        target.Address = source.Address
+WHEN NOT MATCHED BY TARGET THEN
+    INSERT (CustomerID, Name, Address)
+    VALUES (source.CustomerID, source.Name, source.Address)
+WHEN NOT MATCHED BY SOURCE THEN
+    DELETE;
+
+
+	--FULL LOAD
+UPDATE Sales.CustomerDimSET RecordENdDate=GETDATE(),IsCurrent=0,IsDeleted=1
+WHERE CustomerID IN(
+SELECT CustomerID FROM Sales.CustomerDim
+WHERE IsCurrent=1
+)AND CustomerID NOT IN(
+SELECT CustomerID
+FROM #CustomerTemp);
+
+--INCREMENTAL LOAD
+UPDATE Sales.CustomerDimSET RecordENdDate=GETDATE(),IsCurrent=0,IsDeleted=1
+WHERE CustomerID IN(
+SELECT CustomerID FROM Sales.CustomerDim
+WHERE IsCurrent=1
+) AND customerID IN(
+SELECT CustomerID
+FROM #CustomerIncremental
+Where IsDeleted=1
+
+SELECT * FROM sty.dimCustomer;
+SELECT * FROM #tmpCustomer;
+
+

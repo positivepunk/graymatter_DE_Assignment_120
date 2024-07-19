@@ -1,0 +1,36 @@
+CREATE SCHEMA thursday
+-- Create a sample table
+CREATE TABLE thursday.Employees (
+    EmployeeID INT PRIMARY KEY IDENTITY,
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Position NVARCHAR(50),
+    Salary DECIMAL(18, 2),
+    DateOfJoining DATE
+);
+
+drop table Employees
+
+EXEC sys.sp_cdc_enable_db
+
+EXEC sys.sp_cdc_enable_table
+@source_schema=N'thursday',
+@source_name=N'Employees',
+@role_name=NULL
+
+-- Insert sample data into the Employees table
+INSERT INTO thursday.Employees (FirstName, LastName, Position, Salary, DateOfJoining)
+VALUES
+    (N'John', N'Doe', N'Developer', 60000, '2024-01-15'),
+    (N'Jane', N'Smith', N'Analyst', 55000, '2024-02-20');
+
+-- Update an existing record
+UPDATE thursday.Employees
+SET Salary = 65000
+WHERE EmployeeID = 1;
+
+-- Delete a record
+DELETE FROM thursday.Employees
+WHERE EmployeeID = 2;
+
+select *from cdc.thursday_Employees_CT

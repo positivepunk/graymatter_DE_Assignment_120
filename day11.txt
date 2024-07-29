@@ -1,0 +1,37 @@
+class EmployeeManager:
+    def __init__(self):
+        self.employees = {}
+
+    def add_or_update_employee(self, employee_id, name, position, department):
+        self.employees[employee_id] = {
+            'Name': name,
+            'Position': position,
+            'Department': department
+        }
+        print(f"Employee with ID {employee_id} has been added/updated.")
+
+    def display_employee_info(self, employee_id):
+        if employee_id in self.employees:
+            emp_info = self.employees[employee_id]
+            print(f"Employee ID: {employee_id}")
+            print(f"Name: {emp_info['Name']}")
+            print(f"Position: {emp_info.get('Position', 'Not Assigned')}")
+            print(f"Department: {emp_info.get('Department', 'Not Assigned')}")
+        else:
+            print(f"Employee with ID {employee_id} not found.")
+
+if __name__ == "__main__":
+    manager = EmployeeManager()
+    
+    manager.add_or_update_employee(1, "Alice Johnson", "Software Engineer", "Engineering")
+    manager.add_or_update_employee(2, "Bob Smith", "Product Manager", "Product")
+    manager.add_or_update_employee(3, "dob Smith", "Product engineer", "Product")
+  
+    manager.display_employee_info(1)
+    manager.display_employee_info(2)
+    manager.display_employee_info(3)
+
+
+#learnt deploying azure storage account(blobs,adls),deploying virtual machine
+
+#tolearn azure datafactory,databrics
